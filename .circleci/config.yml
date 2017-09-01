@@ -20,13 +20,13 @@ jobs:
                   libdb++-dev \
                   libminiupnpc-dev \
                   libqrencode-dev \
-                  wget
+                  wget \
+                  ca-certificates
       - run:
           name: Build bdb4.8
           command: |
                  cd src
-                 PINKCOIN_ROOT=$(pwd)
-                 BDB_PREFIX="${PINKCOIN_ROOT}/db4"
+                 BDB_PREFIX=/Pink2/src/db4"
                  mkdir -p $BDB_PREFIX
                  wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
                  echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef db-4.8.30.NC.tar.gz' | sha256sum -c
@@ -36,7 +36,7 @@ jobs:
                  --disable-shared --with-pic --prefix=$BDB_PREFIX
                  make install
       - run:
-          name: Build pinkcoin
+          name: Build pinkcoin-qt
           command: |
                   qmake USE_UPNP=1 \
                   USE_DBUS=1 \
@@ -47,4 +47,14 @@ jobs:
                   make
       - store_artifacts:
           path: Pinkcoin-Qt
-          destination: binary
+          destination: pinkcoin-qt
+      - run:
+          name: Build headless bin pink2d
+          command: |
+                  cd src
+                  export BDB_INCLUDE_PATH=/Pink2/src/db4/include
+                  export BDB_LIB_PATH=/Pink2/src/db4/lib
+                  make -f makefile.unix
+      - store_artifacts:
+          path: src/pink2d
+          destination: pink2d
