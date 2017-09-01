@@ -2,7 +2,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/Pink2
+    working_directory: /Pink2
     docker:
       - image: ubuntu:xenial
     steps:
@@ -26,7 +26,7 @@ jobs:
           command: |
                  cd src
                  PINKCOIN_ROOT=$(pwd)
-                 BDB_PREFIX="${BITCOIN_ROOT}/db4"
+                 BDB_PREFIX="${PINKCOIN_ROOT}/db4"
                  mkdir -p $BDB_PREFIX
                  wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
                  echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef db-4.8.30.NC.tar.gz' | sha256sum -c
@@ -38,9 +38,12 @@ jobs:
       - run:
           name: Build pinkcoin
           command: |
-                  qmake USE_UPNP=1 USE_DBUS=1 USE_QRCODE=1 \
-                  BDB_LIB_PATH=~/Pink2/src/db4/lib \
-                  BDB_INCLUDE_PATH=~/Pink2/src/db4/include
+                  qmake USE_UPNP=1 \
+                  USE_DBUS=1 \
+                  CONFIG+=c++11 \
+                  USE_QRCODE=1 \
+                  BDB_LIB_PATH=/Pink2/src/db4/lib \
+                  BDB_INCLUDE_PATH=/Pink2/src/db4/include
                   make
       - store_artifacts:
           path: Pinkcoin-Qt
