@@ -10,9 +10,11 @@ jobs:
       - run:
           name: Install Build Depends
           command: |
+                  echo APT::Install-Recommends "0"; >> /etc/apt/apt.conf &&
+                  echo APT::Install-Suggests "0"; >> /etc/apt/apt.conf &&
                   apt-get update && apt-get install \
                   --no-install-recommends \
-                  --no-install-suggest -y \
+                  -y \
                   qt5-default qt5-qmake qtbase5-dev-tools \
                   qttools5-dev-tools build-essential libboost-dev \
                   libboost-system-dev \
