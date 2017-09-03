@@ -10,8 +10,10 @@ jobs:
       - run:
           name: Install Build Depends
           command: |
-                  apt-get update && apt-get install --no-install-recommends \
-                  -y qt5-default qt5-qmake qtbase5-dev-tools \
+                  apt-get update && apt-get install \
+                  --no-install-recommends \
+                  --no-install-suggest -y \
+                  qt5-default qt5-qmake qtbase5-dev-tools \
                   qttools5-dev-tools build-essential libboost-dev \
                   libboost-system-dev \
                   libboost-filesystem-dev \
