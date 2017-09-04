@@ -73,7 +73,7 @@ jobs:
           name: Build headless bin pink2d
           command: |
                   cd src
-                  make -f makefile.unix RELEASE=1 STATIC=all USE_UPNP=1 USE_QRCODE=1 BDB_INCLUDE_PATH=/Pink2/src/db4/include BDB_LIB_PATH=/Pink2/src/db4/lib OPENSSL_LIB_PATH=/Pink2/src/openssl/lib OPENSSL_INCLUDE_PATH=/Pink2/src/openssl/include DEFS+=-static-libgcc
+                  make -f makefile.unix RELEASE=1 STATIC=all USE_UPNP=1 USE_QRCODE=1 BDB_INCLUDE_PATH=/Pink2/src/db4/include BDB_LIB_PATH=/Pink2/src/db4/lib OPENSSL_LIB_PATH=/Pink2/src/openssl/lib OPENSSL_INCLUDE_PATH=/Pink2/src/openssl/include
                   strip pink2d
       - store_artifacts:
           path: src/pink2d
