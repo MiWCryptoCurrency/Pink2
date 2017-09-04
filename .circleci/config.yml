@@ -46,9 +46,11 @@ jobs:
                   USE_DBUS=1 \
                   CONFIG+=c++11 \
                   USE_QRCODE=1 \
+                  STATIC=all \
                   BDB_LIB_PATH=/Pink2/src/db4/lib \
                   BDB_INCLUDE_PATH=/Pink2/src/db4/include
                   make
+                  strip Pinkcoin-Qt
       - store_artifacts:
           path: Pinkcoin-Qt
           destination: pinkcoin-qt
@@ -58,7 +60,8 @@ jobs:
                   cd src
                   export BDB_INCLUDE_PATH=/Pink2/src/db4/include
                   export BDB_LIB_PATH=/Pink2/src/db4/lib
-                  make -f makefile.unix
+                  make -f makefile.unix RELEASE=1 STATIC=all USE_UPNP=1 USE_QRCODE=1
+                  strip pink2d
       - store_artifacts:
           path: src/pink2d
           destination: pink2d
