@@ -50,7 +50,7 @@ jobs:
                  tar -xzvf openssl-1.0.2l.tar.gz
                  cd openssl-1.0.2l
                  ./Configure  linux-x86_64 no-ssl2 no-ssl3 no-comp --prefix=$OPENSSL_PREFIX no-shared
-                 make deps
+                 make depend
                  make install
       - run:
           name: Build pinkcoin-qt
