@@ -55,11 +55,13 @@ jobs:
       - run:
           name: Build pinkcoin-qt
           command: |
-                  qmake USE_UPNP=1 \
+                  qmake \
+                  USE_UPNP=1 \
                   USE_DBUS=1 \
                   CONFIG+=c++11 \
                   USE_QRCODE=1 \
                   STATIC=all \
+                  RELEASE=1 \
                   BDB_LIB_PATH=/Pink2/src/db4/lib \
                   BDB_INCLUDE_PATH=/Pink2/src/db4/include \
                   OPENSSL_INCLUDE_PATH=/Pink2/src/openssl/include \
