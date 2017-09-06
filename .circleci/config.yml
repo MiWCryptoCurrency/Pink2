@@ -23,7 +23,6 @@ jobs:
                   libboost-thread-dev libssl-dev \
                   libdb++-dev \
                   libminiupnpc-dev \
-                  libqrencode-dev \
                   wget \
                   ca-certificates
       - run:
@@ -39,6 +38,19 @@ jobs:
                  ../dist/configure --enable-cxx \
                  --disable-shared --with-pic --prefix=$BDB_PREFIX
                  make install
+      - run:
+          name: Build qrencode
+          command: |
+                 cd src
+                 QRENCODE_PREFIX=/Pink2/src/qrencode
+                 mkdir -p $QRENCODE_PREFIX
+                 wget 'https://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.gz'
+                 echo 'e794e26a96019013c0e3665cb06b18992668f352c5553d0a553f5d144f7f2a72 qrencode-3.4.4.tar.gz' | sha256sum -c
+                 tar -xzvf qrencode-3.4.4.tar.gz
+                 cd qrencode-3.4.4
+                 ./configure --disable-shared --enable-static --without-tools --prefix=$QRENCODE_PREFIX
+                 make install
+
       - run:
           name: Build openssl
           command: |
@@ -60,12 +72,13 @@ jobs:
                   USE_DBUS=1 \
                   CONFIG+=c++11 \
                   USE_QRCODE=1 \
-                  STATIC=all \
                   RELEASE=1 \
                   BDB_LIB_PATH=/Pink2/src/db4/lib \
                   BDB_INCLUDE_PATH=/Pink2/src/db4/include \
                   OPENSSL_INCLUDE_PATH=/Pink2/src/openssl/include \
-                  OPENSSL_LIB_PATH=/Pink2/src/openssl/lib
+                  OPENSSL_LIB_PATH=/Pink2/src/openssl/lib \
+                  QRENCODE_LIB_PATH=/Pink2/src/qrencode/lib \
+                  QRENCODE_INCLUDE_PATH=/Pink2/src/qrencode/include
                   make
                   strip Pinkcoin-Qt
       - store_artifacts:
@@ -75,7 +88,7 @@ jobs:
           name: Build headless bin pink2d
           command: |
                   cd src
-                  make -f makefile.unix RELEASE=1 STATIC=all USE_UPNP=1 USE_QRCODE=1 BDB_INCLUDE_PATH=/Pink2/src/db4/include BDB_LIB_PATH=/Pink2/src/db4/lib OPENSSL_LIB_PATH=/Pink2/src/openssl/lib OPENSSL_INCLUDE_PATH=/Pink2/src/openssl/include
+                  make -f makefile.unix STATIC=all USE_UPNP=1 USE_QRCODE=1 BDB_INCLUDE_PATH=/Pink2/src/db4/include BDB_LIB_PATH=/Pink2/src/db4/lib OPENSSL_LIB_PATH=/Pink2/src/openssl/lib OPENSSL_INCLUDE_PATH=/Pink2/src/openssl/include
                   strip pink2d
       - store_artifacts:
           path: src/pink2d
