@@ -5,6 +5,9 @@ jobs:
     working_directory: /Pink2
     docker:
       - image: ubuntu:xenial
+        environment:
+          CC: "musl-gcc -static"
+          CXX: "g++ -static"
     steps:
       - checkout
       - run:
@@ -24,7 +27,8 @@ jobs:
                   libdb++-dev \
                   libminiupnpc-dev \
                   wget \
-                  ca-certificates
+                  ca-certificates \
+                  musl-tools
       - run:
           name: Build bdb4.8
           command: |
