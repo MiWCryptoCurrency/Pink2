@@ -6,8 +6,7 @@ jobs:
     docker:
       - image: ubuntu:xenial
         environment:
-          CC: "musl-gcc -static"
-          CXX: "g++ -static"
+          FROM_BUILD: "MiWCryptoCurrency"
     steps:
       - checkout
       - run:
@@ -27,8 +26,7 @@ jobs:
                   libdb++-dev \
                   libminiupnpc-dev \
                   wget \
-                  ca-certificates \
-                  musl-tools
+                  ca-certificates
       - run:
           name: Build bdb4.8
           command: |
