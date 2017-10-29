@@ -94,7 +94,7 @@ jobs:
           name: Set Artifact name as env
           command: |
                   echo 'export BUILD_DATE=$(date "+%Y%m%d%H%M")' >> $BASH_ENV
-                  echo 'export BUILD_NAME=$CIRCLE_TAG-$CIRCLE_SHA1-$BUILD_DATE' >> $BASH_ENV
+                  echo 'export BUILD_NAME=Pinkcoin-Build#$CIRCLE_BUILD_NUM-$BUILD_DATE' >> $BASH_ENV
       - run:
           name: Tar artifacts
           command: |
