@@ -1,0 +1,81 @@
+FROM ubuntu:xenial
+RUN echo APT::Install-Recommends "0"; >> /etc/apt/apt.conf && \
+                  echo APT::Install-Suggests "0"; >> /etc/apt/apt.conf && \
+                  apt-get update && apt-get install \
+                  --no-install-recommends \
+                  -y \
+                  wget ca-certificates p7zip-full autoconf automake autopoint \
+                 bash bzip2 cmake gettext git g++ libffi-dev \ 
+                 gperf intltool libtool libtool-bin libxml-parser-perl \
+                 make openssl patch perl pkg-config python \
+                 ruby flex bison scons sed unzip wget libgtk2.0-dev
+WORKDIR /opt
+RUN git clone https://github.com/mxe/mxe.git
+WORKDIR /opt/mxe
+RUN make MXE_TARGETS="x86_64-w64-mingw32.static" boost
+RUN make MXE_TARGETS="x86_64-w64-mingw32.static" qtbase
+ENV PATH $MXE_PATH/usr/bin:$PATH
+WORKDIR /
+RUN git clone https://github.com/MiWCryptoCurrency/Pink2
+WORKDIR /Pink2
+ENV MXE_PATH /opt/mxe
+
+# qrencode
+WORKDIR /Pink2/
+RUN wget https://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.gz
+RUN echo 'e794e26a96019013c0e3665cb06b18992668f352c5553d0a553f5d144f7f2a72 qrencode-3.4.4.tar.gz' | sha256sum -c
+RUN tar xzvf qrencode-3.4.4.tar.gz
+WORKDIR /Pink2/qrencode-3.4.4
+RUN ./configure --host=x86_64-w64-mingw32 --prefix=$MXE_PATH/usr/x86_64-w64-mingw32.static --disable-shared --enable-static --without-tools
+RUN make -j4 install
+
+# minupnpc
+RUN wget http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.9.tar.gz -O miniupnpc-1.9.tar.gz 
+RUN echo '2923e453e880bb949e3d4da9f83dd3cb6f08946d35de0b864d0339cf70934464 miniupnpc-1.9.tar.gz' | sha256sum -c
+RUN tar xzvf miniupnpc-1.9.tar.gz
+WORKDIR /Pink2/miniupnpc-1.9
+RUN CC=x86_64-w64-mingw32.static-gcc \
+AR=x86_64-w64-mingw32.static-ar \
+DLLWRAP=x86_64-w64-mingw32.static-dllwrap \
+cmake . -DUPNPC_BUILD_STATIC=TRUE -DCMAKE_INSTALL_PREFIX=/opt/mxe/usr/x86_64-w64-mingw32.static/
+RUN make install DLLWRAP=x86_64-w64-mingw32.static-dllwrap CC=x86_64-w64-mingw32.static-gcc \ AR=x86_64-w64-mingw32.static-ar CFLAGS+='-I/opt/mxe/usr/x86_64-w64-mingw32.static/include'
+
+# db 4.8
+WORKDIR /Pink2
+RUN wget 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
+RUN echo '12edc0df75bf9abd7f82f821795bcee50f42cb2e5f76a6a281b85732798364ef db-4.8.30.NC.tar.gz' | sha256sum -c
+RUN tar -xzvf db-4.8.30.NC.tar.gz
+WORKDIR /Pink2/db-4.8.30.NC/build_unix/
+RUN CC=$MXE_PATH/usr/bin/x86_64-w64-mingw32.static-gcc CXX=$MXE_PATH/usr/bin/x86_64-w64-mingw32.static-g++ ../dist/configure --host=x86_64-w64-mingw32 --enable-cxx \
+  --enable-mingw --disable-replication --disable-shared --with-pic --prefix=$MXE_PATH/usr/x86_64-w64-mingw32.static 
+RUN make -j4
+RUN make install
+
+# Build Pinkcoin Headless
+WORKDIR /Pink2/src
+RUN make -f makefile.linux-mingw DEPSDIR=$MXE_PATH/usr/x86_64-w64-mingw32.static TARGET_PLATFORM=x86_64
+# Build QT Wallet GUI
+WORKDIR /Pink2
+ENV MXE_INCLUDE_PATH /opt/mxe/usr/x86_64-w64-mingw32.static/include
+ENV MXE_LIB_PATH /opt/mxe/usr/x86_64-w64-mingw32.static/lib
+RUN x86_64-w64-mingw32.static-qmake-qt5 \
+  USE_UPNP=1 \
+  USE_DBUS=1 \
+  CONFIG+=c++11 \
+  USE_QRCODE=1 \
+  STATIC=all \
+  RELEASE=1 \
+  QRENCODE_INCLUDE_PATH=$MXE_INCLUDE_PATH \
+  QRENCODE_LIB_PATH=$MXE_LIB_PATH  \
+  BOOST_LIB_SUFFIX=-mt \
+  BOOST_THREAD_LIB_SUFFIX=_win32-mt \
+  BOOST_INCLUDE_PATH=$MXE_INCLUDE_PATH/boost \
+  BOOST_LIB_PATH=$MXE_LIB_PATH \
+  OPENSSL_INCLUDE_PATH=$MXE_INCLUDE_PATH/openssl \
+  OPENSSL_LIB_PATH=$MXE_LIB_PATH \
+  BDB_INCLUDE_PATH=$MXE_INCLUDE_PATH \
+  BDB_LIB_PATH=$MXE_LIB_PATH \
+  MINIUPNPC_INCLUDE_PATH=$MXE_INCLUDE_PATH \
+  MINIUPNPC_LIB_PATH=$MXE_LIB_PATH \
+  QMAKE_LRELEASE=$MXE_PATH/usr/x86_64-w64-mingw32.static/qt5/bin/lrelease
+#RUN make -f Makefile.Release
