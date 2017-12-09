@@ -99,7 +99,9 @@ jobs:
           name: Tar artifacts
           command: |
                   mkdir /tmp/build/
-                  tar cvfz /tmp/build/$BUILD_NAME.tar.gz src/pink2d Pinkcoin-Qt
+                  cp src/pink2d /tmp/build
+                  cp Pinkcoin-Qt /tmp/build
+                  tar cvfz /tmp/build/$BUILD_NAME.tar.gz .
       - store_artifacts:
           path: /tmp/build/
           destination: linux
